@@ -20,10 +20,10 @@ function Provider({
           <NextThemesProvider
             attribute="class"
             defaultTheme="light"
-            enableSystem
+            enableSystem={false}
             disableTransitionOnChange
           >
-            <div>{children}</div>
+            {children}
           </NextThemesProvider>
         </AuthContext.Provider>
       </ConvexProvider>
