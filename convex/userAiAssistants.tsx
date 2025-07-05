@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 
 export const InsertSelectedAssistants=mutation({
     args:{
@@ -17,4 +17,18 @@ export const InsertSelectedAssistants=mutation({
         );
         return insertedIds;
     }
+})
+
+export const GetAllUserAssistants=query({
+    args:{
+        uid:v.id('users')
+    },
+    handler:async(ctx,args)=>{
+        const result = await ctx.db.query('userAiAssistants')
+        .filter(q=>q.eq(q.field('uid'),args.uid))
+        .collect();
+
+        return result;
+    }
+
 })
