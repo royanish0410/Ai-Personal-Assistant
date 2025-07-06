@@ -11,21 +11,16 @@ const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
 });
 
-export default function RootLayout({
+export default function MainLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body
-        suppressHydrationWarning
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <Provider>
-          {children}
-        </Provider>
-      </body>
-    </html>
+    <Provider>
+      <div className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        {children}
+      </div>
+    </Provider>
   );
 }
