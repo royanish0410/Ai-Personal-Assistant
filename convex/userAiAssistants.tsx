@@ -11,6 +11,7 @@ export const InsertSelectedAssistants=mutation({
             args.records.map(async(record:any)=>
             await ctx.db.insert('userAiAssistants',{
                 ...record,
+                aiModelId:'Google: Gemini 2.0 Flash',
                 uid:args.uid
             })
             )
@@ -32,3 +33,32 @@ export const GetAllUserAssistants=query({
     }
 
 })
+
+export const UpdateUserAiAssistant = mutation({
+    args: {
+      id: v.id('userAiAssistants'),
+      userInstruction: v.string(),
+      aiModelId: v.optional(v.string()), // ✅ make it optional
+    },
+    handler: async (ctx, args) => {
+      const updateData: Record<string, any> = {
+        userInstruction: args.userInstruction,
+      };
+  
+      if (args.aiModelId) {
+        updateData.aiModelId = args.aiModelId;
+      }
+  
+      return await ctx.db.patch(args.id, updateData);
+    },
+  });
+
+  export const DeleteAssistant = mutation({
+    args:{
+      id:v.id('userAiAssistants')
+    },
+    handler:async(ctx,args) =>{
+      await ctx.db.delete(args.id);
+    }
+  })
+  
