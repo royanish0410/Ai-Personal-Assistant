@@ -37,5 +37,13 @@ export default [
         logo: '/anthropic.png'
 
     },
+    {
+        id: 6,
+        name: 'Groq Mistral',
+        edenAi: 'anthropic/claude-3-5-haiku-latest',
+        // model: 'mistralai/mistral-saba',//OpenRouter.ai
+        logo: '/groq.png'
+
+    },
 
 ] 
