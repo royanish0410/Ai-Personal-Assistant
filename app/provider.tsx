@@ -14,20 +14,21 @@ function Provider({
   const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
   return (
-    <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}>
-      <ConvexProvider client={convex}>
-        <AuthContext.Provider value={{ user, setUser }}>
-          <NextThemesProvider
-            attribute="class" 
-            defaultTheme="light"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <div>{children}</div>
-          </NextThemesProvider>
-        </AuthContext.Provider>
-      </ConvexProvider>
-    </GoogleOAuthProvider>
+    <NextThemesProvider
+      attribute="class"
+      defaultTheme="light"
+      enableSystem={false} // Disable system preference for now
+      disableTransitionOnChange={false}
+      forcedTheme="light" // Force light theme
+    >
+      <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}>
+        <ConvexProvider client={convex}>
+          <AuthContext.Provider value={{ user, setUser }}>
+            {children}
+          </AuthContext.Provider>
+        </ConvexProvider>
+      </GoogleOAuthProvider>
+    </NextThemesProvider>
   );
 }
 
