@@ -11,20 +11,33 @@ import Image from "next/image";
 import { AssistantContext } from "@/context/AssistantContext";
 import { BlurFade } from "@/components/magicui/blur-fade";
 import AddNewAssistant from "./AddNewAssistant";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { LogOut, UserCircle2, UserCircle2Icon } from "lucide-react";
+import Profile from "./Profile";
 
 function AssistantList() {
   const { user } = useContext(AuthContext);
   const convex = useConvex();
   const [assistantList, setAssistantList] = useState<ASSISTANT[]>([]);
   const { assistant, setAssistant } = useContext(AssistantContext);
+  const [loading, setLoading] = useState(false);
+  const [openProfile, setOpenProfile] = useState(false);
+
 
   useEffect(() => {
-    if (user?._id) {
-      GetUserAssistants();
-    }
-  }, [user && assistant == null]);
+    user && GetUserAssistants();
+  },[user && assistant == null])
 
   const GetUserAssistants = async () => {
+      setLoading(true)
+      setAssistantList([]);
     const result = await convex.query(
       api.userAiAssistants.GetAllUserAssistants,
       {
@@ -72,21 +85,35 @@ function AssistantList() {
         ))}
       </div>
 
+      {/* User profile with dropdown */}
       {user?.picture && (
-        <div className="absolute bottom-10 flex gap-3 items-center hover:bg-gray-200 w-[87%] p-2 rounded-xl cursor-pointer">
-          <Image
-            src={user.picture}
-            alt="user"
-            width={35}
-            height={35}
-            className="rounded-full"
-          />
-          <div>
-            <h2 className="font-bold">{user?.name}</h2>
-            <h2 className="text-gray-400 text-sm">
-              {user?.orderId ? "Pro Plan" : "Free Plan"}
-            </h2>
-          </div>
+        <div className="absolute bottom-10 w-[87%]">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <div className="flex gap-3 items-center hover:bg-gray-200 p-2 rounded-xl cursor-pointer">
+                <Image
+                  src={user.picture}
+                  alt="user"
+                  width={35}
+                  height={35}
+                  className="rounded-full"
+                />
+                <div>
+                  <h2 className="font-bold">{user?.name}</h2>
+                  <h2 className="text-gray-400 text-sm">
+                    {user?.orderId ? "Pro Plan" : "Free Plan"}
+                  </h2>
+                </div>
+              </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className='w-[200px]'>
+              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={()=>setOpenProfile(true)}><UserCircle2/> Profile</DropdownMenuItem>
+              <DropdownMenuItem> <LogOut/> Logout</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <Profile openDialog={openProfile} setOpenDialog={setOpenProfile} />
         </div>
       )}
     </div>
