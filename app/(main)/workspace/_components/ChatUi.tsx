@@ -6,6 +6,10 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
 import { Send, Bot, User } from 'lucide-react';
+import { useMutation } from 'convex/react';
+import { api } from '@/convex/_generated/api';
+import { AuthContext } from '@/context/AuthContext';
+import { ASSISTANT } from '../../ai-assistants/page';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -18,6 +22,8 @@ function ChatUi() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { assistant } = useContext(AssistantContext);
+  const {user, setUser} = useContext(AuthContext);
+  const UpdateTokens = useMutation(api.users.UpdateTokens)
 
   // Map display names to backend provider names
   const getProviderName = (modelName: string): string => {
@@ -90,6 +96,24 @@ function ChatUi() {
       onSendMessage();
     }
   };
+
+  const updateUserToken =async (resp:string) => {
+    const tokenCount = resp.trim() ? resp.trim().split(/\s+/).length : 0
+    console.log(tokenCount);
+
+    const result = await UpdateTokens({
+      credits:user?.credits-tokenCount,
+      uid:user?._id
+    });
+
+    setUser((prev:ASSISTANT)=>({
+      ...prev,
+      credits:user?.credits-tokenCount,
+    }))
+    console.log(result);
+    
+    
+  }
 
   return (
     <div className='mt-20 p-6 relative h-[88vh] flex flex-col'>
