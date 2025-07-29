@@ -137,9 +137,9 @@ function ChatUi() {
   };
 
   return (
-    <div className="p-3 sm:p-4 md:p-6 h-full flex flex-col">
+    <div className="h-full flex flex-col bg-white dark:bg-gray-900">
       {/* Messages Container */}
-      <div className="flex-1 overflow-y-auto mb-2 space-y-2 px-1">
+      <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 pb-2 space-y-2">
         {messages.length === 0 ? (
           <EmptyChatState />
         ) : (
@@ -191,19 +191,22 @@ function ChatUi() {
           </div>
         )}
       </div>
-      {/* Input Area */}
-      <div className="flex justify-between p-3 gap-2 border-t bg-white dark:bg-gray-900">
-        <Input
-          placeholder="Start Typing here..."
-          value={input}
-          onChange={(event) => setInput(event.target.value)}
-          onKeyPress={handleKeyPress}
-          disabled={isLoading}
-          className="flex-1 text-sm"
-        />
-        <Button onClick={onSendMessage} disabled={isLoading || !input.trim()} className="px-3">
-          <Send className="w-3 h-3" />
-        </Button>
+      
+      {/* Input Area - Fixed at bottom */}
+      <div className="flex-shrink-0 p-3 sm:p-4 md:p-6 border-t bg-white dark:bg-gray-900">
+        <div className="flex gap-2">
+          <Input
+            placeholder="Start Typing here..."
+            value={input}
+            onChange={(event) => setInput(event.target.value)}
+            onKeyPress={handleKeyPress}
+            disabled={isLoading}
+            className="flex-1 text-sm"
+          />
+          <Button onClick={onSendMessage} disabled={isLoading || !input.trim()} className="px-3">
+            <Send className="w-3 h-3" />
+          </Button>
+        </div>
       </div>
     </div>
   );
