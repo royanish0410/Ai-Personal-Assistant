@@ -1,10 +1,46 @@
 import { NextRequest, NextResponse } from "next/server";
 
+type ProviderConfig = {
+  apiKey: string | undefined;
+  url: string;
+  payload: any;
+  headers: HeadersInit;
+  getText: (result: any) => string;
+};
+
+function missingKeyError(provider: string) {
+  return NextResponse.json(
+    { error: `${provider} API key is missing.` },
+    { status: 500 }
+  );
+}
+
+async function doRequest(
+  url: string,
+  payload: any,
+  headers: HeadersInit,
+  getText: (result: any) => string
+) {
+  const response = await fetch(url, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(payload),
+  });
+
+  const result = await response.json();
+  if (!response.ok) {
+    return {
+      error: true,
+      status: response.status,
+      details: result,
+    };
+  }
+  const text = getText(result) || "No response";
+  return { error: false, text };
+}
+
 export async function POST(req: NextRequest) {
   const { provider, userInput } = await req.json();
-
-  console.log("🧠 Provider:", provider);
-  console.log("🧠 Input:", userInput);
 
   if (!provider || !userInput) {
     return NextResponse.json(
@@ -13,139 +49,106 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  try {
-    // GEMINI
-    if (provider === "gemini") {
-      const GEMINI_API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-      const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
-
-      const payload = {
-        contents: [{ role: "user", parts: [{ text: userInput }] }],
+  // Define set up for each provider
+  let config: ProviderConfig | null = null;
+  switch (provider) {
+    case "gemini": {
+      const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+      if (!apiKey) return missingKeyError("Gemini");
+      config = {
+        apiKey,
+        url: `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+        payload: {
+          contents: [{ role: "user", parts: [{ text: userInput }] }],
+        },
+        headers: { "Content-Type": "application/json" },
+        getText: (result) =>
+          result?.candidates?.[0]?.content?.parts?.[0]?.text,
       };
-
-      const response = await fetch(url, {
-        method: "POST",
+      break;
+    }
+    case "openai": {
+      const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
+      if (!apiKey) return missingKeyError("OpenAI");
+      config = {
+        apiKey,
+        url: "https://api.openai.com/v1/chat/completions",
+        payload: {
+          model: "gpt-3.5-turbo",
+          messages: [{ role: "user", content: userInput }],
+        },
         headers: {
+          Authorization: `Bearer ${apiKey}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(payload),
-      });
-
-      const result = await response.json();
-      console.log(result);
-      const text =
-        result?.candidates?.[0]?.content?.parts?.[0]?.text || "No response";
-      return NextResponse.json({ text });
-    }
-
-    // OPENAI
-    if (provider === "openai") {
-      const OPENAI_API_KEY = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
-      const url = "https://api.openai.com/v1/chat/completions";
-
-      const payload = {
-        model: "gpt-3.5-turbo",
-        messages: [{ role: "user", content: userInput }],
+        getText: (result) => result?.choices?.[0]?.message?.content,
       };
-
-      const response = await fetch(url, {
-        method: "POST",
+      break;
+    }
+    case "groq": {
+      const apiKey = process.env.NEXT_PUBLIC_GROQ_API_KEY;
+      if (!apiKey) return missingKeyError("Groq");
+      config = {
+        apiKey,
+        url: "https://api.groq.com/openai/v1/chat/completions",
+        payload: {
+          model: "mistral-saba-24b",
+          messages: [{ role: "user", content: userInput }],
+        },
         headers: {
-          "Authorization": `Bearer ${OPENAI_API_KEY}`,
+          Authorization: `Bearer ${apiKey}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(payload),
-      });
-
-      const result = await response.json();
-      
-      const text = result?.choices?.[0]?.message?.content || "No response";
-      return NextResponse.json({ text });
-    }
-
-    // GROQ
-    if (provider === "groq") {
-      const GROQ_API_KEY = process.env.NEXT_PUBLIC_GROQ_API_KEY;
-      const url = "https://api.groq.com/openai/v1/chat/completions";
-
-      const payload = {
-        model: "mistral-saba-24b",
-        messages: [{ role: "user", content: userInput }],
+        getText: (result) => result?.choices?.[0]?.message?.content,
       };
-
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${GROQ_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      const result = await response.json();
-      
-      
-      
-      const text = result?.choices?.[0]?.message?.content || "No response";
-      return NextResponse.json({ text });
+      break;
     }
-
-    // MISTRAL
-    if (provider === "mistral") {
-      const MISTRAL_API_KEY = process.env.NEXT_PUBLIC_MISTRAL_API_KEY;
-      const url = "https://api.mistral.ai/v1/chat/completions";
-
-      const payload = {
-        model: "mistral-small",
-        messages: [{ role: "user", content: userInput }],
-      };
-
-      const response = await fetch(url, {
-        method: "POST",
+    case "anthropic": {
+      const apiKey = process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY;
+      if (!apiKey) return missingKeyError("Anthropic");
+      config = {
+        apiKey, // Add this to satisfy TypeScript
+        url: `https://api.anthropic.com/v1/messages`,
+        payload: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1024,
+          messages: [
+            { role: 'user', content: 'Hello, world' }
+          ]
+        }),
         headers: {
-          "Authorization": `Bearer ${MISTRAL_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      const result = await response.json();
-      const text = result?.choices?.[0]?.message?.content || "No response";
-      return NextResponse.json({ text });
-    }
-
-    // ANTHROPIC (Claude)
-    if (provider === "anthropic") {
-      const ANTHROPIC_API_KEY = process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY;
-      const url = "https://api.anthropic.com/v1/messages";
-
-      const payload = {
-        model: "claude-3-opus-20240229",
-        max_tokens: 1024,
-        messages: [{ role: "user", content: userInput }],
-      };
-
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "x-api-key": ANTHROPIC_API_KEY!,
+          "x-api-key": apiKey,
           "anthropic-version": "2023-06-01",
-          "Content-Type": "application/json",
-        } as HeadersInit, // ✅ Fixes TypeScript header typing error
-        body: JSON.stringify(payload),
-      });
+          "content-type": "application/json",
+        },
+        getText: (result) => result?.content?.[0]?.text || "No response"
+      };
+      break;
+    }
+    default:
+      return NextResponse.json(
+        { error: `Provider '${provider}' is not supported.` },
+        { status: 400 }
+      );
+  }
 
-      const result = await response.json();
-      
-      const text = result?.content?.[0]?.text || "No response";
-      return NextResponse.json({ text });
+  try {
+    const resp = await doRequest(
+      config.url,
+      config.payload,
+      config.headers,
+      config.getText
+    );
+
+    if (resp.error) {
+      return NextResponse.json(
+        { error: `API request failed`, details: resp.details },
+        { status: resp.status }
+      );
     }
 
-    return NextResponse.json(
-      { error: `Provider '${provider}' is not supported.` },
-      { status: 400 }
-    );
-  } catch (error) {
+    return NextResponse.json({ text: resp.text }, { status: 200 });
+  } catch (error: any) {
     console.error("❌ AI API error:", error);
     return NextResponse.json(
       { error: "Something went wrong. Please try again." },
