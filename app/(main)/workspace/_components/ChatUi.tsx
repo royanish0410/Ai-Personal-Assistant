@@ -137,9 +137,12 @@ function ChatUi() {
   };
 
   return (
-    <div className="h-full flex flex-col bg-white dark:bg-gray-900" style={{ minHeight: '100%' }}>
-      {/* Messages Container */}
-      <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 space-y-2" style={{ height: 'calc(100% - 80px)' }}>
+    <div className="relative w-full bg-white dark:bg-gray-900" style={{ height: '100%' }}>
+      {/* Messages Container - Absolute positioning for mobile */}
+      <div 
+        className="absolute inset-0 overflow-y-auto p-3 space-y-2"
+        style={{ bottom: '70px' }} // Leave space for input
+      >
         {messages.length === 0 ? (
           <EmptyChatState />
         ) : (
@@ -192,12 +195,12 @@ function ChatUi() {
         )}
       </div>
       
-      {/* Input Area - Fixed at bottom with explicit height */}
+      {/* Input Area - Fixed at bottom */}
       <div 
-        className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 p-3 sm:p-4" 
-        style={{ height: '80px', minHeight: '80px' }}
+        className="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 p-3"
+        style={{ height: '70px', zIndex: 10 }}
       >
-        <div className="flex gap-2 h-full items-center">
+        <div className="flex gap-2 items-center h-full">
           <Input
             placeholder="Start Typing here..."
             value={input}
@@ -209,7 +212,7 @@ function ChatUi() {
           <Button 
             onClick={onSendMessage} 
             disabled={isLoading || !input.trim()} 
-            className="px-3 h-10 w-12 flex-shrink-0"
+            className="h-10 w-10 p-0 flex-shrink-0"
           >
             <Send className="w-4 h-4" />
           </Button>

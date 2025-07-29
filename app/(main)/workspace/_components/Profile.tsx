@@ -15,10 +15,10 @@ import { WalletCardsIcon } from 'lucide-react'
 
 interface ProfileProps {
   openDialog: boolean
-  onOpenChange: (open: boolean) => void
+  setOpenDialog: (open: boolean) => void
 }
 
-function Profile({ openDialog, setOpenDialog }: any) {
+function Profile({ openDialog, setOpenDialog }: ProfileProps) {
   const {user, updateUserCredits} = useContext(AuthContext);
 
   const [maxToken,setMaxtoken] = useState<number>(0);
@@ -58,49 +58,60 @@ function Profile({ openDialog, setOpenDialog }: any) {
 
   return (
     <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-      <DialogContent className='max-w-[95vw] sm:max-w-md md:max-w-lg lg:max-w-xl max-h-[90vh] overflow-y-auto'>
+      <DialogContent className='w-[95vw] max-w-md max-h-[90vh] overflow-y-auto'>
         <DialogHeader>
-          <DialogTitle className='text-lg sm:text-xl'>Profile</DialogTitle>
+          <DialogTitle className='text-base sm:text-lg'>Profile</DialogTitle>
           <DialogDescription asChild>
-            <div className='space-y-3 sm:space-y-4'>
-              <div className='flex gap-2 sm:gap-3 md:gap-4 items-center'>
-                    <Image src={user?.picture} alt='user'width={150} height={150}
-                      className='w-[40px] h-[40px] sm:w-[50px] sm:h-[50px] md:w-[60px] md:h-[60px] rounded-full flex-shrink-0'
-                    />
-                    <div className='min-w-0 flex-1'>
-                      <h2 className='font-bold text-sm sm:text-base md:text-lg truncate'>{user?.name}</h2>
-                      <h2 className='text-gray-500 text-xs sm:text-sm truncate'>{user?.email}</h2>
-                    </div>
+            <div className='space-y-3'>
+              <div className='flex gap-3 items-center'>
+                {user?.picture && (
+                  <Image 
+                    src={user.picture} 
+                    alt='user'
+                    width={50} 
+                    height={50}
+                    className='w-12 h-12 rounded-full flex-shrink-0'
+                  />
+                )}
+                <div className='min-w-0 flex-1'>
+                  <h2 className='font-bold text-sm truncate'>{user?.name}</h2>
+                  <h2 className='text-gray-500 text-xs truncate'>{user?.email}</h2>
+                </div>
               </div>
-              <hr className='my-2 sm:my-3'></hr>
-              <div className='flex flex-col gap-1 sm:gap-2'>
-                <h2 className='font-bold text-sm sm:text-base'>Token Usage</h2>
-                <h2 className='text-sm sm:text-base'>{remainingTokens}/{maxToken}</h2>
-                <Progress value={progressValue} className='h-2 sm:h-3' />
-                <p className='text-xs sm:text-sm text-gray-500'>
+              
+              <hr className='my-3'></hr>
+              
+              <div className='space-y-2'>
+                <h2 className='font-bold text-sm'>Token Usage</h2>
+                <h2 className='text-sm'>{remainingTokens}/{maxToken}</h2>
+                <Progress value={progressValue} className='h-2' />
+                <p className='text-xs text-gray-500'>
                   Used: {usedTokens} tokens | Remaining: {remainingTokens} tokens
                 </p>
-            <h2 className='flex justify-between items-center font-bold mt-2 sm:mt-3 text-sm sm:text-base md:text-lg'>
-              <span>Current Plan</span>
-               <span className='p-1 bg-gray-100 rounded-md px-2 font-normal text-xs sm:text-sm'>{!user?.orderId?'Free Plan':'Pro Plan'}</span>
-            </h2>
-                  </div>
+                
+                <div className='flex justify-between items-center mt-3'>
+                  <span className='font-bold text-sm'>Current Plan</span>
+                  <span className='p-1 bg-gray-100 rounded-md px-2 text-xs'>
+                    {!user?.orderId ? 'Free Plan' : 'Pro Plan'}
+                  </span>
+                </div>
+              </div>
                              
-              <div className='p-3 sm:p-4 border rounded-xl'>
+              <div className='p-3 border rounded-xl'>
                 <div className='flex justify-between items-start'>
                   <div>
-                    <h2 className='font-bold text-sm sm:text-base md:text-lg'>Pro Plan</h2>
-                    <h2 className='text-xs sm:text-sm md:text-base'>500,000 Tokens</h2>
+                    <h2 className='font-bold text-sm'>Pro Plan</h2>
+                    <h2 className='text-xs'>500,000 Tokens</h2>
                   </div>
-                  <h2 className='font-bold text-sm sm:text-base md:text-lg'>$10/month</h2>
+                  <h2 className='font-bold text-sm'>$10/month</h2>
                 </div>
-                <hr className='my-2 sm:my-3'/>
-                <Button className='w-full text-xs sm:text-sm flex items-center gap-1 sm:gap-2'> 
-                  <WalletCardsIcon className='w-3 h-3 sm:w-4 sm:h-4' />
-                  Upgrade (10$)
+                <hr className='my-2'/>
+                <Button className='w-full text-xs flex items-center gap-2'> 
+                  <WalletCardsIcon className='w-3 h-3' />
+                  Upgrade ($10)
                 </Button>
               </div>
-             </div>
+            </div>
           </DialogDescription>
         </DialogHeader>
       </DialogContent>
