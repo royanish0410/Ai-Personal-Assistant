@@ -49,7 +49,6 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Define set up for each provider
   let config: ProviderConfig | null = null;
   switch (provider) {
     case "gemini": {
