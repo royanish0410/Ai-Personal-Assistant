@@ -1,198 +1,212 @@
-"use client"
-import React, { useContext, useState } from 'react'
-import EmptyChatState from './EmptyChatState'
-import { AssistantContext } from '@/context/AssistantContext';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-
-import { Send, Bot, User } from 'lucide-react';
-import { useMutation } from 'convex/react';
-import { api } from '@/convex/_generated/api';
-import { AuthContext } from '@/context/AuthContext';
-import { ASSISTANT } from '../../ai-assistants/page';
+"use client";
+import React, { useContext, useState } from "react";
+import EmptyChatState from "./EmptyChatState";
+import { AssistantContext } from "@/context/AssistantContext";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Send, Bot, User } from "lucide-react";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { AuthContext } from "@/context/AuthContext";
+import { ASSISTANT } from "../../ai-assistants/page";
 
 interface Message {
-  role: 'user' | 'assistant';
+  role: "user" | "assistant";
   content: string;
   timestamp: Date;
 }
 
+const MODEL_MAP: Record<string, string> = {
+  "groq mistral": "groq",
+  "openai gpt-3.5": "openai",
+  "google gemini": "gemini",
+  "gemini 1.5 flash": "gemini",
+  "google: gemini 1.5 flash": "gemini",
+  "mistral: saba": "mistral",
+  "anthropic claude": "anthropic",
+};
+
+function normalizeModelName(name: string): string {
+  return name.trim().toLowerCase();
+}
+
 function ChatUi() {
-  const [input, setInput] = useState<string>('');
+  const [input, setInput] = useState<string>("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { assistant } = useContext(AssistantContext);
-  const {user, setUser} = useContext(AuthContext);
-  const UpdateTokens = useMutation(api.users.UpdateTokens)
+  const { user, setUser } = useContext(AuthContext);
+  const UpdateTokens = useMutation(api.users.UpdateTokens);
 
-  // Map display names to backend provider names
+  // Map UI model names (case-insensitive) to backend provider keys
   const getProviderName = (modelName: string): string => {
-    const modelMap: { [key: string]: string } = {
-      'Groq Mistral': 'groq',
-      'OpenAI GPT-3.5': 'openai',
-      'Google Gemini': 'gemini',
-      'Mistral AI': 'mistral',
-      'Anthropic Claude': 'anthropic',
-      // Add more mappings as needed based on your AiModelOptions
-    };
-    
-    return modelMap[modelName] || modelName.toLowerCase();
+    const normalized = normalizeModelName(modelName);
+    return MODEL_MAP[normalized] || normalized;
+  };
+
+  // Calculate token count simply by whitespace splitting (can replace with tokenizer lib if needed)
+  const updateUserToken = async (responseText: string) => {
+    if (!user) return;
+    const tokenCount = responseText.trim() ? responseText.trim().split(/\s+/).length : 0;
+    const newCredits = Math.max(0, (user.credits || 0) - tokenCount);
+
+    try {
+      await UpdateTokens({
+        credits: newCredits,
+        uid: user._id,
+      });
+      setUser((prev: ASSISTANT) => ({
+        ...prev,
+        credits: newCredits,
+      }));
+    } catch (err) {
+      console.error("Failed to update user tokens:", err);
+    }
   };
 
   const onSendMessage = async () => {
     if (!input.trim()) return;
 
     const userMessage: Message = {
-      role: 'user',
+      role: "user",
       content: input,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setIsLoading(true);
-    setInput('');
+    setInput("");
 
     try {
-      const response = await fetch('/api/ai-model', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      const providerKey = getProviderName(assistant?.aiModelId || "groq");
+
+      const response = await fetch("/api/ai-model", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          provider: getProviderName(assistant?.aiModelId || 'groq'),
-          userInput: input
-        })
+          provider: providerKey,
+          userInput: input,
+        }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Something went wrong');
+        const errMsg = data.error || "Something went wrong.";
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: "assistant",
+            content: `🤖 Error: ${errMsg}${data.details ? " - " + JSON.stringify(data.details) : ""}`,
+            timestamp: new Date(),
+          },
+        ]);
+        setIsLoading(false);
+        return;
       }
 
       const assistantMessage: Message = {
-        role: 'assistant',
+        role: "assistant",
         content: data.text,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
 
-      setMessages(prev => [...prev, assistantMessage]);
-    } catch (error) {
-      console.error('Error sending message:', error);
-      const errorMessage: Message = {
-        role: 'assistant',
-        content: 'Sorry, something went wrong. Please try again.',
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages((prev) => [...prev, assistantMessage]);
+
+      await updateUserToken(data.text);
+    } catch (error: any) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: "Sorry, something went wrong. Please try again.",
+          timestamp: new Date(),
+        },
+      ]);
+      console.error("Error in onSendMessage:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       onSendMessage();
     }
   };
 
-  const updateUserToken =async (resp:string) => {
-    const tokenCount = resp.trim() ? resp.trim().split(/\s+/).length : 0
-    console.log(tokenCount);
-
-    const result = await UpdateTokens({
-      credits:user?.credits-tokenCount,
-      uid:user?._id
-    });
-
-    setUser((prev:ASSISTANT)=>({
-      ...prev,
-      credits:user?.credits-tokenCount,
-    }))
-    console.log(result);
-    
-    
-  }
-
   return (
-    <div className='mt-20 p-6 relative h-[88vh] flex flex-col'>
+    <div className="mt-12 sm:mt-16 md:mt-20 p-3 sm:p-4 md:p-6 relative h-[88vh] flex flex-col">
       {/* Messages Container */}
-      <div className='flex-1 overflow-y-auto mb-4 space-y-4'>
+      <div className="flex-1 overflow-y-auto mb-2 space-y-2 px-1">
         {messages.length === 0 ? (
           <EmptyChatState />
         ) : (
           messages.map((message, index) => (
             <div
               key={index}
-              className={`flex items-start gap-3 ${
-                message.role === 'user' ? 'justify-end' : 'justify-start'
+              className={`flex items-start gap-2 ${
+                message.role === "user" ? "justify-end" : "justify-start"
               }`}
             >
-              {message.role === 'assistant' && (
-                <div className='w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center'>
-                  <Bot className='w-4 h-4' />
+              {message.role === "assistant" && (
+                <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <Bot className="w-3 h-3" />
                 </div>
               )}
-              
               <div
-                className={`max-w-[80%] rounded-lg p-3 ${
-                  message.role === 'user'
-                    ? 'bg-primary text-primary-foreground ml-auto'
-                    : 'bg-muted'
+                className={`max-w-[85%] rounded-lg p-2 ${
+                  message.role === "user"
+                    ? "bg-primary text-primary-foreground ml-auto"
+                    : "bg-muted"
                 }`}
               >
-                <p className='text-sm whitespace-pre-wrap'>{message.content}</p>
-                <span className='text-xs opacity-70 mt-1 block'>
+                <p className="text-xs whitespace-pre-wrap break-words">{message.content}</p>
+                <span className="text-xs opacity-70 mt-1 block">
                   {message.timestamp.toLocaleTimeString()}
                 </span>
               </div>
-
-              {message.role === 'user' && (
-                <div className='w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center'>
-                  <User className='w-4 h-4' />
+              {message.role === "user" && (
+                <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <User className="w-3 h-3" />
                 </div>
               )}
             </div>
           ))
         )}
-        
         {/* Loading indicator */}
         {isLoading && (
-          <div className='flex items-start gap-3'>
-            <div className='w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center'>
-              <Bot className='w-4 h-4' />
+          <div className="flex items-start gap-2">
+            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <Bot className="w-3 h-3" />
             </div>
-            <div className='bg-muted rounded-lg p-3'>
-              <div className='flex space-x-1'>
-                <div className='w-2 h-2 bg-current rounded-full animate-bounce [animation-delay:-0.3s]'></div>
-                <div className='w-2 h-2 bg-current rounded-full animate-bounce [animation-delay:-0.15s]'></div>
-                <div className='w-2 h-2 bg-current rounded-full animate-bounce'></div>
+            <div className="bg-muted rounded-lg p-2">
+              <div className="flex space-x-1">
+                <div className="w-1.5 h-1.5 bg-current rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                <div className="w-1.5 h-1.5 bg-current rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                <div className="w-1.5 h-1.5 bg-current rounded-full animate-bounce"></div>
               </div>
             </div>
           </div>
         )}
       </div>
-
       {/* Input Area */}
-      <div className='flex justify-between p-5 gap-5 border-t'>
-        <Input 
-          placeholder='Start Typing here...'
+      <div className="flex justify-between p-3 gap-2 border-t">
+        <Input
+          placeholder="Start Typing here..."
           value={input}
           onChange={(event) => setInput(event.target.value)}
           onKeyPress={handleKeyPress}
           disabled={isLoading}
-          className='flex-1'
+          className="flex-1 text-sm"
         />
-        <Button 
-          onClick={onSendMessage} 
-          disabled={isLoading || !input.trim()}
-        >
-          <Send className='w-4 h-4' />
+        <Button onClick={onSendMessage} disabled={isLoading || !input.trim()} className="px-3">
+          <Send className="w-3 h-3" />
         </Button>
       </div>
     </div>
-  )
+  );
 }
 
-export default ChatUi
+export default ChatUi;
