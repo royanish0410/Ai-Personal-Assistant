@@ -11,14 +11,14 @@ function AssistantAvatar({children,selectedImage}:any) {
   return (
 <Popover>
   <PopoverTrigger>{children}</PopoverTrigger>
-  <PopoverContent>
-    <div className='grid grid-cols-5 gap-2'>
+  <PopoverContent className="w-auto max-w-xs sm:max-w-sm">
+    <div className='grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2'>
         {AiAssistantsList.map((assistant,index)=>(
             <Image src={assistant.image} alt={assistant.name}
             key={index}
             width={80}
             height={80}
-            className='w-[30px] h-[30px] rounded-lg cursor-pointer object-cover'
+            className='w-[25px] h-[25px] sm:w-[30px] sm:h-[30px] rounded-lg cursor-pointer object-cover'
             onClick={()=>selectedImage(assistant.image)}
             />
         ))}
