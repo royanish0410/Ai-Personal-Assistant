@@ -1,8 +1,8 @@
 export default [
     {
         id: 1,
-        name: 'Google: Gemini 2.0 Flash',
-        edenAi: 'google/gemini-2.0-flash',
+        name: 'Google: Gemini 1.5 Flash',
+        edenAi: 'google/gemini-1.5-flash',
         // model: 'google/gemini-2.0-flash-lite-001',//OpenRouter.ai
         logo: '/google.png'
     },
@@ -32,7 +32,7 @@ export default [
     {
         id: 5,
         name: 'anthropic',
-        edenAi: 'anthropic/claude-3-5-haiku-latest',
+        edenAi: 'anthropic/Claude Haiku 3',
         // model: 'mistralai/mistral-saba',//OpenRouter.ai
         logo: '/anthropic.png'
 
