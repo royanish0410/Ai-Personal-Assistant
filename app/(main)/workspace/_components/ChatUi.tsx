@@ -137,9 +137,9 @@ function ChatUi() {
   };
 
   return (
-    <div className="h-full flex flex-col bg-white dark:bg-gray-900">
+    <div className="h-full flex flex-col bg-white dark:bg-gray-900" style={{ minHeight: '100%' }}>
       {/* Messages Container */}
-      <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 pb-2 space-y-2">
+      <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 space-y-2" style={{ height: 'calc(100% - 80px)' }}>
         {messages.length === 0 ? (
           <EmptyChatState />
         ) : (
@@ -162,7 +162,7 @@ function ChatUi() {
                     : "bg-muted"
                 }`}
               >
-                <p className="text-xs whitespace-pre-wrap break-words">{message.content}</p>
+                <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
                 <span className="text-xs opacity-70 mt-1 block">
                   {message.timestamp.toLocaleTimeString()}
                 </span>
@@ -192,19 +192,26 @@ function ChatUi() {
         )}
       </div>
       
-      {/* Input Area - Fixed at bottom */}
-      <div className="flex-shrink-0 p-3 sm:p-4 md:p-6 border-t bg-white dark:bg-gray-900">
-        <div className="flex gap-2">
+      {/* Input Area - Fixed at bottom with explicit height */}
+      <div 
+        className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 p-3 sm:p-4" 
+        style={{ height: '80px', minHeight: '80px' }}
+      >
+        <div className="flex gap-2 h-full items-center">
           <Input
             placeholder="Start Typing here..."
             value={input}
             onChange={(event) => setInput(event.target.value)}
             onKeyPress={handleKeyPress}
             disabled={isLoading}
-            className="flex-1 text-sm"
+            className="flex-1 text-sm h-10"
           />
-          <Button onClick={onSendMessage} disabled={isLoading || !input.trim()} className="px-3">
-            <Send className="w-3 h-3" />
+          <Button 
+            onClick={onSendMessage} 
+            disabled={isLoading || !input.trim()} 
+            className="px-3 h-10 w-12 flex-shrink-0"
+          >
+            <Send className="w-4 h-4" />
           </Button>
         </div>
       </div>

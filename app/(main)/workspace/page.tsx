@@ -22,7 +22,7 @@ function Workspace() {
           className="flex items-center gap-2"
         >
           <Menu className="w-4 h-4" />
-           AI Assistants
+          Assistants
         </Button>
         
         <h1 className="font-semibold text-lg">AI Chat</h1>
@@ -39,7 +39,7 @@ function Workspace() {
       </div>
 
       {/* Main Content Area */}
-      <div className='h-[calc(100vh-48px)] md:h-full'>
+      <div className='md:h-full' style={{ height: 'calc(100vh - 48px)' }}>
         <div className='grid grid-cols-1 sm:grid-cols-3 md:grid-cols-5 h-full'>
           {/* Assistant List - Desktop: Always visible, Mobile: Slide-out panel */}
           <div className='hidden md:block md:col-span-1'>
