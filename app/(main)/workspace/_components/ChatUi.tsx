@@ -137,7 +137,7 @@ function ChatUi() {
   };
 
   return (
-    <div className="mt-12 sm:mt-16 md:mt-20 p-3 sm:p-4 md:p-6 relative h-[88vh] flex flex-col">
+    <div className="p-3 sm:p-4 md:p-6 h-full flex flex-col">
       {/* Messages Container */}
       <div className="flex-1 overflow-y-auto mb-2 space-y-2 px-1">
         {messages.length === 0 ? (
@@ -192,7 +192,7 @@ function ChatUi() {
         )}
       </div>
       {/* Input Area */}
-      <div className="flex justify-between p-3 gap-2 border-t">
+      <div className="flex justify-between p-3 gap-2 border-t bg-white dark:bg-gray-900">
         <Input
           placeholder="Start Typing here..."
           value={input}

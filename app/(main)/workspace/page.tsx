@@ -66,7 +66,7 @@ function Workspace() {
         )}
 
         {/* Chat UI - Takes full width on mobile, shared space on larger screens */}
-        <div className='col-span-1 sm:col-span-3 md:col-span-4 lg:col-span-3 h-full md:h-full mt-12 md:mt-0'>
+        <div className='col-span-1 sm:col-span-3 md:col-span-4 lg:col-span-3 h-[calc(100vh-48px)] md:h-full'>
           <ChatUi />
         </div>
 
