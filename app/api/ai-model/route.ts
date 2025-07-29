@@ -107,7 +107,7 @@ export async function POST(req: NextRequest) {
       const apiKey = process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY;
       if (!apiKey) return missingKeyError("Anthropic");
       config = {
-        apiKey, // Add this to satisfy TypeScript
+        apiKey, 
         url: `https://api.anthropic.com/v1/messages`,
         payload: JSON.stringify({
           model: 'claude-sonnet-4-20250514',
