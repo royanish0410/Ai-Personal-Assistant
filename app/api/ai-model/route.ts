@@ -49,6 +49,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // Define set up for each provider
   let config: ProviderConfig | null = null;
   switch (provider) {
     case "gemini": {
@@ -102,25 +103,41 @@ export async function POST(req: NextRequest) {
       };
       break;
     }
+    case "mistral": {
+      const apiKey = process.env.NEXT_PUBLIC_MISTRAL_API_KEY;
+      if (!apiKey) return missingKeyError("Mistral");
+      config = {
+        apiKey,
+        url: "https://api.mistral.ai/v1/chat/completions",
+        payload: {
+          model: "mistral-small",
+          messages: [{ role: "user", content: userInput }],
+        },
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        getText: (result) => result?.choices?.[0]?.message?.content,
+      };
+      break;
+    }
     case "anthropic": {
       const apiKey = process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY;
       if (!apiKey) return missingKeyError("Anthropic");
       config = {
-        apiKey, 
-        url: `https://api.anthropic.com/v1/messages`,
-        payload: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
+        apiKey,
+        url: "https://api.anthropic.com/v1/messages",
+        payload: {
+          model: "claude-3-opus-20240229",
           max_tokens: 1024,
-          messages: [
-            { role: 'user', content: 'Hello, world' }
-          ]
-        }),
+          messages: [{ role: "user", content: userInput }],
+        },
         headers: {
           "x-api-key": apiKey,
           "anthropic-version": "2023-06-01",
-          "content-type": "application/json",
+          "Content-Type": "application/json",
         },
-        getText: (result) => result?.content?.[0]?.text || "No response"
+        getText: (result) => result?.content?.[0]?.text,
       };
       break;
     }
