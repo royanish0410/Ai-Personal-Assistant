@@ -74,16 +74,16 @@ function AIAssistants() {
   };
 
   return (
-    <div className="px-10 mt-20 md:px-28 lg:px-36 xl:px-48">
-      <div className="flex justify-between items-center">
+    <div className="px-4 sm:px-10 mt-10 sm:mt-20 md:px-28 lg:px-36 xl:px-48">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0">
         <div>
           <BlurFade delay={0.25} inView>
-            <h2 className="text-3xl font-bold">
+            <h2 className="text-2xl sm:text-3xl font-bold">
               Welcome to the World of AI Assistants 🤖
             </h2>
           </BlurFade>
           <BlurFade delay={0.5} inView>
-            <p className="text-xl mt-2">
+            <p className="text-lg sm:text-xl mt-2">
               Choose your AI companion to Simplify Your Tasks 🚀
             </p>
           </BlurFade>
@@ -91,13 +91,14 @@ function AIAssistants() {
         <RainbowButton
           disabled={selectedAssistants.length === 0 || loading}
           onClick={onClickContinue}
+          className="w-full sm:w-auto"
         >
           {loading && <Loader2Icon className="animate-spin mr-2" />}
           Continue
         </RainbowButton>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5 mt-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-5 mt-5">
         {AiAssistantsList.map((assistant, index) => (
           <BlurFade key={assistant.id} delay={0.25 + index * 0.05} inView>
             <div
@@ -114,12 +115,12 @@ function AIAssistants() {
                 alt={assistant.name}
                 width={600}
                 height={600}
-                className="rounded-xl w-full h-[200px] object-cover"
+                className="rounded-xl w-full h-[150px] sm:h-[200px] object-cover"
               />
-              <h2 className="text-center font-bold text-lg">
+              <h2 className="text-center font-bold text-base sm:text-lg">
                 {assistant.name}
               </h2>
-              <h2 className="text-center text-gray-600 dark:text-gray-300">
+              <h2 className="text-center text-gray-600 dark:text-gray-300 text-sm sm:text-base">
                 {assistant.title}
               </h2>
             </div>
