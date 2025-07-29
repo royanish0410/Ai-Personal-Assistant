@@ -21,15 +21,16 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { LogOut, UserCircle2, UserCircle2Icon } from "lucide-react";
 import Profile from "./Profile";
+import { useRouter } from "next/navigation";
 
 function AssistantList() {
-  const { user } = useContext(AuthContext);
+  const { user, logout } = useContext(AuthContext);
   const convex = useConvex();
+  const router = useRouter();
   const [assistantList, setAssistantList] = useState<ASSISTANT[]>([]);
   const { assistant, setAssistant } = useContext(AssistantContext);
   const [loading, setLoading] = useState(false);
   const [openProfile, setOpenProfile] = useState(false);
-
 
   useEffect(() => {
     user && GetUserAssistants();
@@ -46,23 +47,35 @@ function AssistantList() {
     );
     console.log(result);
     setAssistantList(result);
+    setLoading(false);
+  };
+
+  const handleLogout = () => {
+    // Clear assistant context
+    setAssistant(null);
+    // Call logout function from AuthContext
+    if (logout) {
+      logout();
+    }
+    // Redirect to sign-in page
+    router.push("/sign-in");
   };
 
   return (
-    <div className="relative p-5 bg-secondary border-r-[1px] h-screen">
-      <h2 className="font-bold text-lg">Your Personal AI Assistants</h2>
+    <div className="relative p-3 sm:p-5 bg-secondary border-r-[1px] h-screen max-w-full sm:max-w-none overflow-hidden">
+      <h2 className="font-bold text-base sm:text-lg">Your Personal AI Assistants</h2>
 
       <AddNewAssistant>
-        <Button className="w-full mt-3">+ Add New Assistant</Button>
+        <Button className="w-full mt-3 text-sm sm:text-base">+ Add New Assistant</Button>
       </AddNewAssistant>
 
-      <Input className="bg-white mt-3" placeholder="Search" />
+      <Input className="bg-white mt-3 text-sm sm:text-base" placeholder="Search" />
 
-      <div className="mt-5">
+      <div className="mt-5 overflow-y-auto max-h-[calc(100vh-200px)] sm:max-h-none">
         {assistantList.map((assistant_, index) => (
           <BlurFade key={assistant_.image} delay={0.25 + index * 0.05} inView>
             <div
-              className={`p-2 flex gap-3 items-center hover:bg-gray-200 hover:dark:bg-slate-700 rounded-xl cursor-pointer mt-2 ${
+              className={`p-2 flex gap-2 sm:gap-3 items-center hover:bg-gray-200 hover:dark:bg-slate-700 rounded-xl cursor-pointer mt-2 ${
                 assistant_.id === assistant?.id ? "bg-gray-200" : ""
               }`}
               onClick={() => setAssistant(assistant_)}
@@ -72,11 +85,11 @@ function AssistantList() {
                 alt={assistant_.name}
                 width={60}
                 height={60}
-                className="rounded-xl w-[60px] h-[60px] object-cover"
+                className="rounded-xl w-[40px] h-[40px] sm:w-[60px] sm:h-[60px] object-cover flex-shrink-0"
               />
-              <div>
-                <h2 className="font-bold">{assistant_.name}</h2>
-                <h2 className="text-gray-600 text-sm dark:text-gray-300">
+              <div className="min-w-0 flex-1">
+                <h2 className="font-bold text-sm sm:text-base truncate">{assistant_.name}</h2>
+                <h2 className="text-gray-600 text-xs sm:text-sm dark:text-gray-300 truncate">
                   {assistant_.title}
                 </h2>
               </div>
@@ -87,20 +100,20 @@ function AssistantList() {
 
       {/* User profile with dropdown */}
       {user?.picture && (
-        <div className="absolute bottom-10 w-[87%]">
+        <div className="absolute bottom-5 sm:bottom-10 w-[calc(100%-1.5rem)] sm:w-[87%]">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <div className="flex gap-3 items-center hover:bg-gray-200 p-2 rounded-xl cursor-pointer">
+              <div className="flex gap-2 sm:gap-3 items-center hover:bg-gray-200 p-2 rounded-xl cursor-pointer">
                 <Image
                   src={user.picture}
                   alt="user"
                   width={35}
                   height={35}
-                  className="rounded-full"
+                  className="rounded-full w-[30px] h-[30px] sm:w-[35px] sm:h-[35px] flex-shrink-0"
                 />
-                <div>
-                  <h2 className="font-bold">{user?.name}</h2>
-                  <h2 className="text-gray-400 text-sm">
+                <div className="min-w-0 flex-1">
+                  <h2 className="font-bold text-sm sm:text-base truncate">{user?.name}</h2>
+                  <h2 className="text-gray-400 text-xs sm:text-sm">
                     {user?.orderId ? "Pro Plan" : "Free Plan"}
                   </h2>
                 </div>
@@ -109,8 +122,12 @@ function AssistantList() {
             <DropdownMenuContent className='w-[200px]'>
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={()=>setOpenProfile(true)}><UserCircle2/> Profile</DropdownMenuItem>
-              <DropdownMenuItem> <LogOut/> Logout</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setOpenProfile(true)}>
+                <UserCircle2/> Profile
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleLogout}>
+                <LogOut/> Logout
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
           <Profile openDialog={openProfile} setOpenDialog={setOpenProfile} />
