@@ -8,21 +8,6 @@ export default [
     },
     {
         id: 2,
-        name: 'OpenAI: GPT-4o-mini',
-        edenAi: 'openai/gpt-4o-mini',
-        // model: 'openai/gpt-4o-mini',//OpenRouter.ai
-        logo: '/chatgpt.png'
-
-    },
-    {
-        id: 3,
-        name: 'OpenAI: GPT-3.5 Turbo',
-        edenAi: 'openai/gpt-4o-mini',
-        // model: 'openai/gpt-3.5-turbo',//OpenRouter.ai
-        logo: '/chatgpt.png'
-    },
-    {
-        id: 4,
         name: 'Mistral: Saba',
         edenAi: 'mistral/pixtral-large-latest',
         // model: 'mistralai/mistral-saba',//OpenRouter.ai
@@ -30,15 +15,7 @@ export default [
 
     },
     {
-        id: 5,
-        name: 'anthropic',
-        edenAi: 'anthropic/Claude Haiku 3',
-        // model: 'mistralai/mistral-saba',//OpenRouter.ai
-        logo: '/anthropic.png'
-
-    },
-    {
-        id: 6,
+        id: 3,
         name: 'Groq Mistral',
         edenAi: 'anthropic/claude-3-5-haiku-latest',
         // model: 'mistralai/mistral-saba',//OpenRouter.ai
