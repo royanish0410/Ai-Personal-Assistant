@@ -18,12 +18,10 @@ interface Message {
 
 const MODEL_MAP: Record<string, string> = {
   "groq mistral": "groq",
-  "openai gpt-3.5": "openai",
   "google gemini": "gemini",
   "gemini 1.5 flash": "gemini",
   "google: gemini 1.5 flash": "gemini",
   "mistral: saba": "mistral",
-  "anthropic claude": "anthropic",
 };
 
 function normalizeModelName(name: string): string {
@@ -44,10 +42,10 @@ function ChatUi() {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    
+
     checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
   // Map UI model names (case-insensitive) to backend provider keys
@@ -59,7 +57,9 @@ function ChatUi() {
   // Calculate token count simply by whitespace splitting (can replace with tokenizer lib if needed)
   const updateUserToken = async (responseText: string) => {
     if (!user) return;
-    const tokenCount = responseText.trim() ? responseText.trim().split(/\s+/).length : 0;
+    const tokenCount = responseText.trim()
+      ? responseText.trim().split(/\s+/).length
+      : 0;
     const newCredits = Math.max(0, (user.credits || 0) - tokenCount);
 
     try {
@@ -109,7 +109,9 @@ function ChatUi() {
           ...prev,
           {
             role: "assistant",
-            content: `🤖 Error: ${errMsg}${data.details ? " - " + JSON.stringify(data.details) : ""}`,
+            content: `🤖 Error: ${errMsg}${
+              data.details ? " - " + JSON.stringify(data.details) : ""
+            }`,
             timestamp: new Date(),
           },
         ]);
@@ -141,7 +143,7 @@ function ChatUi() {
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       onSendMessage();
@@ -151,7 +153,7 @@ function ChatUi() {
   if (isMobile) {
     // Mobile Layout - Use viewport units and ensure input is visible
     return (
-      <div className="w-full bg-white dark:bg-gray-900 h-full flex flex-col relative">
+      <div className="w-full bg-white dark:bg-gray-900 h-screen flex flex-col relative">
         {/* Messages Container - Flex grow to take available space */}
         <div className="flex-1 overflow-y-auto p-3 space-y-2 pb-20">
           {messages.length === 0 ? (
@@ -176,7 +178,9 @@ function ChatUi() {
                       : "bg-muted"
                   }`}
                 >
-                  <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
+                  <p className="text-sm whitespace-pre-wrap break-words">
+                    {message.content}
+                  </p>
                   <span className="text-xs opacity-70 mt-1 block">
                     {message.timestamp.toLocaleTimeString()}
                   </span>
@@ -205,7 +209,7 @@ function ChatUi() {
             </div>
           )}
         </div>
-        
+
         {/* Input Area - Absolute within container, not fixed to viewport */}
         <div className="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 p-4">
           <div className="flex gap-3 items-center">
@@ -213,13 +217,13 @@ function ChatUi() {
               placeholder="Start Typing here..."
               value={input}
               onChange={(event) => setInput(event.target.value)}
-              onKeyPress={handleKeyPress}
+              onKeyDown={handleKeyPress} // Changed from onKeyPress to onKeyDown
               disabled={isLoading}
               className="flex-1 text-base h-12 rounded-xl border-2 focus:border-primary bg-gray-50 dark:bg-gray-800"
             />
-            <Button 
-              onClick={onSendMessage} 
-              disabled={isLoading || !input.trim()} 
+            <Button
+              onClick={onSendMessage}
+              disabled={isLoading || !input.trim()}
               className="h-12 w-12 p-0 flex-shrink-0 rounded-xl shadow-lg"
             >
               <Send className="w-5 h-5" />
@@ -257,7 +261,9 @@ function ChatUi() {
                     : "bg-muted"
                 }`}
               >
-                <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
+                <p className="text-sm whitespace-pre-wrap break-words">
+                  {message.content}
+                </p>
                 <span className="text-xs opacity-70 mt-1 block">
                   {message.timestamp.toLocaleTimeString()}
                 </span>
@@ -286,7 +292,7 @@ function ChatUi() {
           </div>
         )}
       </div>
-      
+
       {/* Desktop Input Area */}
       <div className="flex-shrink-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 p-3">
         <div className="flex gap-2 items-center">
@@ -294,13 +300,13 @@ function ChatUi() {
             placeholder="Start Typing here..."
             value={input}
             onChange={(event) => setInput(event.target.value)}
-            onKeyPress={handleKeyPress}
+            onKeyDown={handleKeyPress} // updated here as well
             disabled={isLoading}
             className="flex-1 text-sm h-10"
           />
-          <Button 
-            onClick={onSendMessage} 
-            disabled={isLoading || !input.trim()} 
+          <Button
+            onClick={onSendMessage}
+            disabled={isLoading || !input.trim()}
             className="h-10 w-10 p-0 flex-shrink-0"
           >
             <Send className="w-4 h-4" />
