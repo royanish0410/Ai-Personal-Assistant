@@ -208,7 +208,7 @@ function ChatUi() {
         </div>
 
         {/* Input Container */}
-        <div className="absolute bottom-4 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 p-4">
+        <div className="absolute bottom-8 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 p-4">
           <div className="flex gap-3 items-center">
             <Input
               placeholder="Start Typing here..."
