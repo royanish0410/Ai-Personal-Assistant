@@ -12,7 +12,6 @@ function Workspace() {
   const [showSettings, setShowSettings] = useState(false);
 
   return (
-    // Added `flex flex-col` so children can flex properly, h-screen with fixed positioning
     <div className="h-screen fixed w-full flex flex-col">
       {/* Mobile Header */}
       <div className="md:hidden flex items-center justify-between p-3 bg-secondary border-b">
