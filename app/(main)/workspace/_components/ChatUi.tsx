@@ -37,7 +37,6 @@ function ChatUi() {
   const { user, setUser } = useContext(AuthContext);
   const UpdateTokens = useMutation(api.users.UpdateTokens);
 
-  // Detect mobile viewport
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
@@ -48,13 +47,11 @@ function ChatUi() {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  // Map UI model names (case-insensitive) to backend provider keys
   const getProviderName = (modelName: string): string => {
     const normalized = normalizeModelName(modelName);
     return MODEL_MAP[normalized] || normalized;
   };
 
-  // Calculate token count simply by whitespace splitting (can replace with tokenizer lib if needed)
   const updateUserToken = async (responseText: string) => {
     if (!user) return;
     const tokenCount = responseText.trim()
@@ -151,10 +148,9 @@ function ChatUi() {
   };
 
   if (isMobile) {
-    // Mobile Layout — use h-full to fill parent's height (not h-screen)
     return (
       <div className="w-full bg-white dark:bg-gray-900 h-full flex flex-col relative">
-        {/* Messages Container - scrollable with flex-grow */}
+        {/* Messages scroll container */}
         <div className="flex-1 overflow-y-auto p-3 space-y-2 pb-20">
           {messages.length === 0 ? (
             <EmptyChatState />
@@ -194,7 +190,7 @@ function ChatUi() {
             ))
           )}
 
-          {/* Loading indicator */}
+          {/* Loading */}
           {isLoading && (
             <div className="flex items-start gap-2">
               <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -211,14 +207,14 @@ function ChatUi() {
           )}
         </div>
 
-        {/* Input Area - absolute positioned at bottom inside relative container */}
+        {/* Input Container */}
         <div className="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 p-4">
           <div className="flex gap-3 items-center">
             <Input
               placeholder="Start Typing here..."
               value={input}
               onChange={(event) => setInput(event.target.value)}
-              onKeyDown={handleKeyPress} // updated to onKeyDown
+              onKeyDown={handleKeyPress} // use onKeyDown here
               disabled={isLoading}
               className="flex-1 text-base h-12 rounded-xl border-2 focus:border-primary bg-gray-50 dark:bg-gray-800"
             />
@@ -235,10 +231,9 @@ function ChatUi() {
     );
   }
 
-  // Desktop Layout - same as before, but changed onKeyPress to onKeyDown
+  // Desktop layout unchanged except onKeyDown usage
   return (
     <div className="h-full w-full bg-white dark:bg-gray-900 flex flex-col">
-      {/* Messages Container */}
       <div className="flex-1 overflow-y-auto p-3 space-y-2 min-h-0">
         {messages.length === 0 ? (
           <EmptyChatState />
@@ -277,7 +272,6 @@ function ChatUi() {
             </div>
           ))
         )}
-        {/* Loading indicator */}
         {isLoading && (
           <div className="flex items-start gap-2">
             <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -294,7 +288,6 @@ function ChatUi() {
         )}
       </div>
 
-      {/* Desktop Input Area */}
       <div className="flex-shrink-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 p-3">
         <div className="flex gap-2 items-center">
           <Input
