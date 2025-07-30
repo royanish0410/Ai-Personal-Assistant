@@ -151,12 +151,9 @@ function ChatUi() {
   if (isMobile) {
     // Mobile Layout - Use viewport units and ensure input is visible
     return (
-      <div className="w-full bg-white dark:bg-gray-900" style={{ height: '100vh' }}>
-        {/* Messages Container - Fixed height leaving space for input */}
-        <div 
-          className="overflow-y-auto p-3 space-y-2"
-          style={{ height: 'calc(100vh - 140px)' }}
-        >
+      <div className="w-full bg-white dark:bg-gray-900 h-full flex flex-col relative">
+        {/* Messages Container - Flex grow to take available space */}
+        <div className="flex-1 overflow-y-auto p-3 space-y-2 pb-20">
           {messages.length === 0 ? (
             <EmptyChatState />
           ) : (
@@ -209,19 +206,9 @@ function ChatUi() {
           )}
         </div>
         
-        {/* Input Area - Fixed at bottom with guaranteed visibility */}
-        <div 
-          className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 p-4"
-          style={{ 
-            position: 'fixed',
-            bottom: '0',
-            left: '0',
-            right: '0',
-            height: '80px',
-            zIndex: 1000
-          }}
-        >
-          <div className="flex gap-3 items-center h-full">
+        {/* Input Area - Absolute within container, not fixed to viewport */}
+        <div className="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 p-4">
+          <div className="flex gap-3 items-center">
             <Input
               placeholder="Start Typing here..."
               value={input}
