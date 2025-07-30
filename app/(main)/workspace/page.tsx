@@ -12,6 +12,7 @@ function Workspace() {
   const [showSettings, setShowSettings] = useState(false);
 
   return (
+    // Added flex flex-col so children distribute height properly
     <div className="h-screen fixed w-full flex flex-col">
       {/* Mobile Header */}
       <div className="md:hidden flex items-center justify-between p-3 bg-secondary border-b">
@@ -39,30 +40,26 @@ function Workspace() {
       </div>
 
       {/* Main Content Area */}
-      {/* Added flex flex-col so children use vertical space properly */}
       <div
-        className="md:h-full flex flex-col"
+        className="md:h-full flex flex-col flex-1" // Added flex-1 for grow
         style={{ height: "calc(100vh - 48px)" }}
       >
         <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-5 h-full">
-          {/* Assistant List - Desktop: Always visible */}
           <div className="hidden md:block md:col-span-1">
             <AssistantList />
           </div>
 
-          {/* Chat UI */}
           <div className="col-span-1 sm:col-span-3 md:col-span-4 lg:col-span-3 h-full">
             <ChatUi />
           </div>
 
-          {/* Settings - Desktop: Always visible */}
           <div className="hidden lg:block lg:col-span-1">
             <AssistantSettings />
           </div>
         </div>
       </div>
 
-      {/* Mobile Assistant List Overlay */}
+      {/* Mobile assistant list overlay */}
       {showAssistantList && (
         <div className="md:hidden fixed inset-0 z-50 bg-black bg-opacity-50">
           <div className="w-80 max-w-[85vw] h-full bg-white dark:bg-gray-900 transform transition-transform duration-300 ease-in-out">
@@ -83,7 +80,7 @@ function Workspace() {
         </div>
       )}
 
-      {/* Mobile Settings Overlay */}
+      {/* Mobile settings overlay */}
       {showSettings && (
         <div className="lg:hidden fixed inset-0 z-50 bg-black bg-opacity-50">
           <div className="ml-auto w-80 max-w-[85vw] h-full bg-white dark:bg-gray-900 transform transition-transform duration-300 ease-in-out">
@@ -104,7 +101,7 @@ function Workspace() {
         </div>
       )}
 
-      {/* Mobile overlay backdrop handlers */}
+      {/* Backdrop handlers */}
       {showAssistantList && (
         <div
           className="md:hidden fixed inset-0 bg-transparent z-40"
