@@ -1,5 +1,5 @@
 "use client";
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import EmptyChatState from "./EmptyChatState";
 import { AssistantContext } from "@/context/AssistantContext";
 import { Input } from "@/components/ui/input";
@@ -34,9 +34,21 @@ function ChatUi() {
   const [input, setInput] = useState<string>("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isMobile, setIsMobile] = useState<boolean>(false);
   const { assistant } = useContext(AssistantContext);
   const { user, setUser } = useContext(AuthContext);
   const UpdateTokens = useMutation(api.users.UpdateTokens);
+
+  // Detect mobile viewport
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Map UI model names (case-insensitive) to backend provider keys
   const getProviderName = (modelName: string): string => {
@@ -136,10 +148,106 @@ function ChatUi() {
     }
   };
 
+  if (isMobile) {
+    // Mobile Layout - Use viewport units and ensure input is visible
+    return (
+      <div className="w-full bg-white dark:bg-gray-900" style={{ height: '100vh' }}>
+        {/* Messages Container - Fixed height leaving space for input */}
+        <div 
+          className="overflow-y-auto p-3 space-y-2"
+          style={{ height: 'calc(100vh - 140px)' }}
+        >
+          {messages.length === 0 ? (
+            <EmptyChatState />
+          ) : (
+            messages.map((message, index) => (
+              <div
+                key={index}
+                className={`flex items-start gap-2 ${
+                  message.role === "user" ? "justify-end" : "justify-start"
+                }`}
+              >
+                {message.role === "assistant" && (
+                  <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <Bot className="w-4 h-4" />
+                  </div>
+                )}
+                <div
+                  className={`max-w-[85%] rounded-lg p-3 ${
+                    message.role === "user"
+                      ? "bg-primary text-primary-foreground ml-auto"
+                      : "bg-muted"
+                  }`}
+                >
+                  <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
+                  <span className="text-xs opacity-70 mt-1 block">
+                    {message.timestamp.toLocaleTimeString()}
+                  </span>
+                </div>
+                {message.role === "user" && (
+                  <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <User className="w-4 h-4" />
+                  </div>
+                )}
+              </div>
+            ))
+          )}
+          {/* Loading indicator */}
+          {isLoading && (
+            <div className="flex items-start gap-2">
+              <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <Bot className="w-4 h-4" />
+              </div>
+              <div className="bg-muted rounded-lg p-3">
+                <div className="flex space-x-1">
+                  <div className="w-1.5 h-1.5 bg-current rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                  <div className="w-1.5 h-1.5 bg-current rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                  <div className="w-1.5 h-1.5 bg-current rounded-full animate-bounce"></div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+        
+        {/* Input Area - Fixed at bottom with guaranteed visibility */}
+        <div 
+          className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 p-4"
+          style={{ 
+            position: 'fixed',
+            bottom: '0',
+            left: '0',
+            right: '0',
+            height: '80px',
+            zIndex: 1000
+          }}
+        >
+          <div className="flex gap-3 items-center h-full">
+            <Input
+              placeholder="Start Typing here..."
+              value={input}
+              onChange={(event) => setInput(event.target.value)}
+              onKeyPress={handleKeyPress}
+              disabled={isLoading}
+              className="flex-1 text-base h-12 rounded-xl border-2 focus:border-primary bg-gray-50 dark:bg-gray-800"
+            />
+            <Button 
+              onClick={onSendMessage} 
+              disabled={isLoading || !input.trim()} 
+              className="h-12 w-12 p-0 flex-shrink-0 rounded-xl shadow-lg"
+            >
+              <Send className="w-5 h-5" />
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Desktop Layout - Use flexbox
   return (
-    <div className="h-full w-full bg-white dark:bg-gray-900 flex flex-col relative">
-      {/* Messages Container - With proper mobile spacing */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-2 pb-20 md:pb-3">
+    <div className="h-full w-full bg-white dark:bg-gray-900 flex flex-col">
+      {/* Messages Container */}
+      <div className="flex-1 overflow-y-auto p-3 space-y-2 min-h-0">
         {messages.length === 0 ? (
           <EmptyChatState />
         ) : (
@@ -192,26 +300,24 @@ function ChatUi() {
         )}
       </div>
       
-      {/* Input Area - Fixed at bottom with safe mobile positioning */}
-      <div className="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 md:relative md:flex-shrink-0">
-        <div className="p-3 pb-6 md:pb-3">
-          <div className="flex gap-2 items-center">
-            <Input
-              placeholder="Start Typing here..."
-              value={input}
-              onChange={(event) => setInput(event.target.value)}
-              onKeyPress={handleKeyPress}
-              disabled={isLoading}
-              className="flex-1 text-base md:text-sm h-12 md:h-10 rounded-lg border-2 focus:border-primary"
-            />
-            <Button 
-              onClick={onSendMessage} 
-              disabled={isLoading || !input.trim()} 
-              className="h-12 w-12 md:h-10 md:w-10 p-0 flex-shrink-0 rounded-lg"
-            >
-              <Send className="w-5 h-5 md:w-4 md:h-4" />
-            </Button>
-          </div>
+      {/* Desktop Input Area */}
+      <div className="flex-shrink-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 p-3">
+        <div className="flex gap-2 items-center">
+          <Input
+            placeholder="Start Typing here..."
+            value={input}
+            onChange={(event) => setInput(event.target.value)}
+            onKeyPress={handleKeyPress}
+            disabled={isLoading}
+            className="flex-1 text-sm h-10"
+          />
+          <Button 
+            onClick={onSendMessage} 
+            disabled={isLoading || !input.trim()} 
+            className="h-10 w-10 p-0 flex-shrink-0"
+          >
+            <Send className="w-4 h-4" />
+          </Button>
         </div>
       </div>
     </div>
