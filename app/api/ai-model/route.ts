@@ -8,10 +8,21 @@ type ProviderConfig = {
   getText: (result: any) => string;
 };
 
+function corsHeaders(): HeadersInit {
+  return {
+    "Access-Control-Allow-Origin": "https://ai-personal-assistant-one.vercel.app",
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+  };
+}
+
 function missingKeyError(provider: string) {
   return NextResponse.json(
     { error: `${provider} API key is missing.` },
-    { status: 500 }
+    {
+      status: 500,
+      headers: corsHeaders(),
+    }
   );
 }
 
@@ -39,18 +50,28 @@ async function doRequest(
   return { error: false, text };
 }
 
+export async function OPTIONS(req: NextRequest) {
+  return new NextResponse(null, {
+    status: 204,
+    headers: corsHeaders(),
+  });
+}
+
 export async function POST(req: NextRequest) {
   const { provider, userInput } = await req.json();
 
   if (!provider || !userInput) {
     return NextResponse.json(
       { error: "Missing provider or userInput" },
-      { status: 400 }
+      {
+        status: 400,
+        headers: corsHeaders(),
+      }
     );
   }
 
-  // Define set up for each provider
   let config: ProviderConfig | null = null;
+
   switch (provider) {
     case "gemini": {
       const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
@@ -67,6 +88,7 @@ export async function POST(req: NextRequest) {
       };
       break;
     }
+
     case "openai": {
       const apiKey = process.env.NEXT_PUBLIC_OPENAI_API_KEY;
       if (!apiKey) return missingKeyError("OpenAI");
@@ -85,6 +107,7 @@ export async function POST(req: NextRequest) {
       };
       break;
     }
+
     case "groq": {
       const apiKey = process.env.NEXT_PUBLIC_GROQ_API_KEY;
       if (!apiKey) return missingKeyError("Groq");
@@ -103,6 +126,7 @@ export async function POST(req: NextRequest) {
       };
       break;
     }
+
     case "mistral": {
       const apiKey = process.env.NEXT_PUBLIC_MISTRAL_API_KEY;
       if (!apiKey) return missingKeyError("Mistral");
@@ -121,6 +145,7 @@ export async function POST(req: NextRequest) {
       };
       break;
     }
+
     case "anthropic": {
       const apiKey = process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY;
       if (!apiKey) return missingKeyError("Anthropic");
@@ -141,10 +166,14 @@ export async function POST(req: NextRequest) {
       };
       break;
     }
+
     default:
       return NextResponse.json(
         { error: `Provider '${provider}' is not supported.` },
-        { status: 400 }
+        {
+          status: 400,
+          headers: corsHeaders(),
+        }
       );
   }
 
@@ -159,16 +188,26 @@ export async function POST(req: NextRequest) {
     if (resp.error) {
       return NextResponse.json(
         { error: `API request failed`, details: resp.details },
-        { status: resp.status }
+        {
+          status: resp.status,
+          headers: corsHeaders(),
+        }
       );
     }
 
-    return NextResponse.json({ text: resp.text }, { status: 200 });
+    return NextResponse.json({ text: resp.text }, {
+      status: 200,
+      headers: corsHeaders(),
+    });
+
   } catch (error: any) {
     console.error("❌ AI API error:", error);
     return NextResponse.json(
       { error: "Something went wrong. Please try again." },
-      { status: 500 }
+      {
+        status: 500,
+        headers: corsHeaders(),
+      }
     );
   }
 }
