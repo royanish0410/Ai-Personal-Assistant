@@ -137,12 +137,9 @@ function ChatUi() {
   };
 
   return (
-    <div className="relative w-full bg-white dark:bg-gray-900" style={{ height: '100%' }}>
-      {/* Messages Container - Absolute positioning for mobile */}
-      <div 
-        className="absolute inset-0 overflow-y-auto p-3 space-y-2"
-        style={{ bottom: '70px' }} // Leave space for input
-      >
+    <div className="h-full w-full bg-white dark:bg-gray-900 flex flex-col">
+      {/* Messages Container - Flex grow to take available space */}
+      <div className="flex-1 overflow-y-auto p-3 space-y-2 min-h-0">
         {messages.length === 0 ? (
           <EmptyChatState />
         ) : (
@@ -195,27 +192,26 @@ function ChatUi() {
         )}
       </div>
       
-      {/* Input Area - Fixed at bottom */}
-      <div 
-        className="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 p-3"
-        style={{ height: '70px', zIndex: 10 }}
-      >
-        <div className="flex gap-2 items-center h-full">
-          <Input
-            placeholder="Start Typing here..."
-            value={input}
-            onChange={(event) => setInput(event.target.value)}
-            onKeyPress={handleKeyPress}
-            disabled={isLoading}
-            className="flex-1 text-sm h-10"
-          />
-          <Button 
-            onClick={onSendMessage} 
-            disabled={isLoading || !input.trim()} 
-            className="h-10 w-10 p-0 flex-shrink-0"
-          >
-            <Send className="w-4 h-4" />
-          </Button>
+      {/* Input Area - Fixed at bottom with proper mobile spacing */}
+      <div className="flex-shrink-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+        <div className="p-3 pb-safe">
+          <div className="flex gap-2 items-center">
+            <Input
+              placeholder="Start Typing here..."
+              value={input}
+              onChange={(event) => setInput(event.target.value)}
+              onKeyPress={handleKeyPress}
+              disabled={isLoading}
+              className="flex-1 text-sm h-10 md:h-9"
+            />
+            <Button 
+              onClick={onSendMessage} 
+              disabled={isLoading || !input.trim()} 
+              className="h-10 w-10 md:h-9 md:w-9 p-0 flex-shrink-0"
+            >
+              <Send className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
       </div>
     </div>
