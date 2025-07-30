@@ -1,20 +1,21 @@
 "use client";
 
-import React, { useState } from 'react'
-import AssistantList from './_components/AssistantList'
-import AssistantSettings from './_components/AssistantSettings'
-import ChatUi from './_components/ChatUi'
-import { Button } from "@/components/ui/button"
-import { Menu, Settings, X } from "lucide-react"
+import React, { useState } from "react";
+import AssistantList from "./_components/AssistantList";
+import AssistantSettings from "./_components/AssistantSettings";
+import ChatUi from "./_components/ChatUi";
+import { Button } from "@/components/ui/button";
+import { Menu, Settings, X } from "lucide-react";
 
 function Workspace() {
-  const [showAssistantList, setShowAssistantList] = useState(false)
-  const [showSettings, setShowSettings] = useState(false)
+  const [showAssistantList, setShowAssistantList] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   return (
-    <div className='h-screen fixed w-full'>
+    // Added `flex flex-col` so children can flex properly, h-screen with fixed positioning
+    <div className="h-screen fixed w-full flex flex-col">
       {/* Mobile Header */}
-      <div className='md:hidden flex items-center justify-between p-3 bg-secondary border-b'>
+      <div className="md:hidden flex items-center justify-between p-3 bg-secondary border-b">
         <Button
           variant="ghost"
           size="sm"
@@ -24,9 +25,9 @@ function Workspace() {
           <Menu className="w-4 h-4" />
           Assistants
         </Button>
-        
+
         <h1 className="font-semibold text-lg">AI Chat</h1>
-        
+
         <Button
           variant="ghost"
           size="sm"
@@ -39,20 +40,24 @@ function Workspace() {
       </div>
 
       {/* Main Content Area */}
-      <div className='md:h-full' style={{ height: 'calc(100vh - 48px)' }}>
-        <div className='grid grid-cols-1 sm:grid-cols-3 md:grid-cols-5 h-full'>
-          {/* Assistant List - Desktop: Always visible, Mobile: Slide-out panel */}
-          <div className='hidden md:block md:col-span-1'>
+      {/* Added flex flex-col so children use vertical space properly */}
+      <div
+        className="md:h-full flex flex-col"
+        style={{ height: "calc(100vh - 48px)" }}
+      >
+        <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-5 h-full">
+          {/* Assistant List - Desktop: Always visible */}
+          <div className="hidden md:block md:col-span-1">
             <AssistantList />
           </div>
 
-          {/* Chat UI - Takes full width on mobile, shared space on larger screens */}
-          <div className='col-span-1 sm:col-span-3 md:col-span-4 lg:col-span-3 h-full'>
+          {/* Chat UI */}
+          <div className="col-span-1 sm:col-span-3 md:col-span-4 lg:col-span-3 h-full">
             <ChatUi />
           </div>
 
-          {/* Settings - Desktop: Always visible, Mobile: Slide-out panel */}
-          <div className='hidden lg:block lg:col-span-1'>
+          {/* Settings - Desktop: Always visible */}
+          <div className="hidden lg:block lg:col-span-1">
             <AssistantSettings />
           </div>
         </div>
@@ -72,7 +77,7 @@ function Workspace() {
                 <X className="w-4 h-4" />
               </Button>
             </div>
-            <div className="h-[calc(100%-60px)]">
+            <div className="h-[calc(100%-60px)] overflow-auto">
               <AssistantList />
             </div>
           </div>
@@ -93,7 +98,7 @@ function Workspace() {
                 <X className="w-4 h-4" />
               </Button>
             </div>
-            <div className="h-[calc(100%-60px)]">
+            <div className="h-[calc(100%-60px)] overflow-auto">
               <AssistantSettings />
             </div>
           </div>
@@ -102,19 +107,19 @@ function Workspace() {
 
       {/* Mobile overlay backdrop handlers */}
       {showAssistantList && (
-        <div 
+        <div
           className="md:hidden fixed inset-0 bg-transparent z-40"
           onClick={() => setShowAssistantList(false)}
         />
       )}
       {showSettings && (
-        <div 
+        <div
           className="lg:hidden fixed inset-0 bg-transparent z-40"
           onClick={() => setShowSettings(false)}
         />
       )}
     </div>
-  )
+  );
 }
 
-export default Workspace
+export default Workspace;
