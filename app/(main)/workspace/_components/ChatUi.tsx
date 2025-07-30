@@ -151,10 +151,10 @@ function ChatUi() {
   };
 
   if (isMobile) {
-    // Mobile Layout - Use viewport units and ensure input is visible
+    // Mobile Layout — use h-full to fill parent's height (not h-screen)
     return (
-      <div className="w-full bg-white dark:bg-gray-900 h-screen flex flex-col relative">
-        {/* Messages Container - Flex grow to take available space */}
+      <div className="w-full bg-white dark:bg-gray-900 h-full flex flex-col relative">
+        {/* Messages Container - scrollable with flex-grow */}
         <div className="flex-1 overflow-y-auto p-3 space-y-2 pb-20">
           {messages.length === 0 ? (
             <EmptyChatState />
@@ -193,6 +193,7 @@ function ChatUi() {
               </div>
             ))
           )}
+
           {/* Loading indicator */}
           {isLoading && (
             <div className="flex items-start gap-2">
@@ -210,14 +211,14 @@ function ChatUi() {
           )}
         </div>
 
-        {/* Input Area - Absolute within container, not fixed to viewport */}
+        {/* Input Area - absolute positioned at bottom inside relative container */}
         <div className="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 p-4">
           <div className="flex gap-3 items-center">
             <Input
               placeholder="Start Typing here..."
               value={input}
               onChange={(event) => setInput(event.target.value)}
-              onKeyDown={handleKeyPress} // Changed from onKeyPress to onKeyDown
+              onKeyDown={handleKeyPress} // updated to onKeyDown
               disabled={isLoading}
               className="flex-1 text-base h-12 rounded-xl border-2 focus:border-primary bg-gray-50 dark:bg-gray-800"
             />
@@ -234,7 +235,7 @@ function ChatUi() {
     );
   }
 
-  // Desktop Layout - Use flexbox
+  // Desktop Layout - same as before, but changed onKeyPress to onKeyDown
   return (
     <div className="h-full w-full bg-white dark:bg-gray-900 flex flex-col">
       {/* Messages Container */}
@@ -300,7 +301,7 @@ function ChatUi() {
             placeholder="Start Typing here..."
             value={input}
             onChange={(event) => setInput(event.target.value)}
-            onKeyDown={handleKeyPress} // updated here as well
+            onKeyDown={handleKeyPress}
             disabled={isLoading}
             className="flex-1 text-sm h-10"
           />
