@@ -137,9 +137,9 @@ function ChatUi() {
   };
 
   return (
-    <div className="h-full w-full bg-white dark:bg-gray-900 flex flex-col">
-      {/* Messages Container - Flex grow to take available space */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-2 min-h-0">
+    <div className="h-full w-full bg-white dark:bg-gray-900 flex flex-col relative">
+      {/* Messages Container - With proper mobile spacing */}
+      <div className="flex-1 overflow-y-auto p-3 space-y-2 pb-20 md:pb-3">
         {messages.length === 0 ? (
           <EmptyChatState />
         ) : (
@@ -192,9 +192,9 @@ function ChatUi() {
         )}
       </div>
       
-      {/* Input Area - Fixed at bottom with proper mobile spacing */}
-      <div className="flex-shrink-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
-        <div className="p-3 pb-safe">
+      {/* Input Area - Fixed at bottom with safe mobile positioning */}
+      <div className="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 md:relative md:flex-shrink-0">
+        <div className="p-3 pb-6 md:pb-3">
           <div className="flex gap-2 items-center">
             <Input
               placeholder="Start Typing here..."
@@ -202,14 +202,14 @@ function ChatUi() {
               onChange={(event) => setInput(event.target.value)}
               onKeyPress={handleKeyPress}
               disabled={isLoading}
-              className="flex-1 text-sm h-10 md:h-9"
+              className="flex-1 text-base md:text-sm h-12 md:h-10 rounded-lg border-2 focus:border-primary"
             />
             <Button 
               onClick={onSendMessage} 
               disabled={isLoading || !input.trim()} 
-              className="h-10 w-10 md:h-9 md:w-9 p-0 flex-shrink-0"
+              className="h-12 w-12 md:h-10 md:w-10 p-0 flex-shrink-0 rounded-lg"
             >
-              <Send className="w-4 h-4" />
+              <Send className="w-5 h-5 md:w-4 md:h-4" />
             </Button>
           </div>
         </div>
