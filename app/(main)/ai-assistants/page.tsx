@@ -31,17 +31,18 @@ function AIAssistants() {
   const router = useRouter();
 
   useEffect(() => {
-    if (user) GetUserAssistants();
+    if (user) {
+      checkIfUserAlreadyHasAssistants();
+    }
   }, [user]);
 
-  const GetUserAssistants = async () => {
+  const checkIfUserAlreadyHasAssistants = async () => {
     const result = await convex.query(api.userAiAssistants.GetAllUserAssistants, {
       uid: user._id,
     });
-    console.log(result);
+
     if (result.length > 0) {
       router.replace("/workspace");
-      return;
     }
   };
 
@@ -58,31 +59,38 @@ function AIAssistants() {
     selectedAssistants.some((a) => a.id === assistant.id);
 
   const onClickContinue = async () => {
-    if (!user?._id) return;
+    if (!user?._id || selectedAssistants.length === 0) return;
+
     setLoading(true);
     try {
-      const result = await insertAssistant({
-        records: selectedAssistants,
+      const uniqueAssistants = Array.from(
+        new Map(selectedAssistants.map((a) => [a.id, a])).values()
+      );
+
+      await insertAssistant({
+        records: uniqueAssistants,
         uid: user._id,
       });
-      console.log("Inserted:", result);
+
+      router.replace("/workspace");
     } catch (error) {
       console.error("Error inserting assistants:", error);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
-    <div className="px-2 sm:px-6 md:px-10 xl:px-48 mt-4 sm:mt-10">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0">
+    <div className="px-4 pt-24 sm:pt-16 sm:px-10 md:px-20 lg:px-28 xl:px-36 min-h-screen">
+      <div className="w-full flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mt-2">
         <div>
           <BlurFade delay={0.25} inView>
-            <h2 className="text-lg sm:text-2xl font-bold leading-tight text-gray-900 dark:text-white">
+            <h2 className="text-2xl sm:text-3xl font-bold">
               Welcome to the World of AI Assistants 🤖
             </h2>
           </BlurFade>
           <BlurFade delay={0.5} inView>
-            <p className="text-base sm:text-lg mt-1 text-gray-700 dark:text-gray-200">
+            <p className="text-lg sm:text-xl mt-2">
               Choose your AI companion to Simplify Your Tasks 🚀
             </p>
           </BlurFade>
@@ -99,36 +107,24 @@ function AIAssistants() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-5 mt-5">
         {AiAssistantsList.map((assistant, index) => (
-          <BlurFade key={assistant.id} delay={0.25 + index * 0.05} inView>
-            <div
-              className="hover:border p-3 rounded-xl bg-white dark:bg-gray-900 relative transition-all cursor-pointer flex flex-col gap-1"
-              style={{
-                minHeight: 230, // ensures consistent card height for image + text
-                boxShadow: "0 1px 6px 0 rgba(0,0,0,.04)",
-              }}
-              onClick={() => onSelect(assistant)}
-            >
+          <BlurFade key={index} delay={0.25 + index * 0.05} inView>
+            <div className="hover:border p-3 rounded-xl hover:scale-105 transition-all ease-in-out cursor-pointer relative">
               <Checkbox
-                className="absolute top-2 left-2 z-10"
+                className="absolute m-2 z-10"
                 checked={isAssistantSelected(assistant)}
                 onCheckedChange={() => onSelect(assistant)}
               />
-              <div className="w-full rounded-xl overflow-hidden mb-2">
-                <Image
-                  src={assistant.image}
-                  alt={assistant.name}
-                  width={300}
-                  height={128}
-                  className="w-full h-32 sm:h-40 object-cover object-top"
-                  priority
-                />
-              </div>
-              <h2 className="text-center font-bold text-sm sm:text-base truncate">
-                {assistant.name}
-              </h2>
-              <h3 className="text-center text-gray-600 dark:text-gray-300 text-xs sm:text-sm mt-0.5 truncate">
+              <Image
+                src={assistant.image}
+                alt={assistant.name}
+                width={600}
+                height={600}
+                className="rounded-xl w-full h-[150px] sm:h-[200px] object-cover"
+              />
+              <h2 className="text-center font-bold text-base sm:text-lg">{assistant.name}</h2>
+              <h2 className="text-center text-gray-600 dark:text-gray-300 text-sm sm:text-base">
                 {assistant.title}
-              </h3>
+              </h2>
             </div>
           </BlurFade>
         ))}
