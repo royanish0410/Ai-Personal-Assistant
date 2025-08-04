@@ -115,7 +115,7 @@ export async function POST(req: NextRequest) {
         apiKey,
         url: "https://api.groq.com/openai/v1/chat/completions",
         payload: {
-          model: "mistral-saba-24b",
+          model: "qwen/qwen3-32b",
           messages: [{ role: "user", content: userInput }],
         },
         headers: {
