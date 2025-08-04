@@ -73,7 +73,7 @@ function AssistantList() {
 
       <div className="mt-5 overflow-y-auto max-h-[calc(100vh-200px)] sm:max-h-none">
         {assistantList.map((assistant_, index) => (
-          <BlurFade key={assistant_.image} delay={0.25 + index * 0.05} inView>
+          <BlurFade key={index} delay={0.25 + index * 0.05} inView>
             <div
               className={`p-2 flex gap-2 sm:gap-3 items-center hover:bg-gray-200 hover:dark:bg-slate-700 rounded-xl cursor-pointer mt-2 ${
                 assistant_.id === assistant?.id ? "bg-gray-200" : ""
